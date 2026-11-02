@@ -1,0 +1,48 @@
+name: Build Flutter Web
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Web
+      run: flutter build web --release
+
+    - name: Build Package frontend
+      run: |
+        cd build/web
+        zip -r ../../cognium-frontend.zip .
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cognium-frontend
+        path: cognium-frontend.zip
+
+    - name: Publish release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: cognium-frontend.zip
+        generate_release_notes: true
