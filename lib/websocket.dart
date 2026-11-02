@@ -35,7 +35,7 @@ class WebSocket {
         'https' => 'wss',
         'http' => 'ws',
         _ => throw UnsupportedError(
-            'Esquema não suportado: ${baseUri.scheme}',
+            'Unsuported scheme: ${baseUri.scheme}',
           ),
       },
       path: '/ws'

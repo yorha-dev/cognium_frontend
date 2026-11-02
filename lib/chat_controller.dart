@@ -19,25 +19,36 @@ class ChatController extends ChangeNotifier {
     getSelectedModel();
 
     _sub = _socket.events.listen((raw) {
-      final data = jsonDecode(raw);
+      final data = jsonDecode(raw) as Map;
 
-      if (data.containsKey('chat_id')) {
-        if (data.containsKey('new_id')) {
-          updateChatList();
+      if (data.containsKey('type') &&
+          data.containsKey('content') &&
+          data['type'] != 'content') {
+        null;
+      } else {
+        final content = data['content'] as Map;
 
-          if (data['chat_id'] == _chatIndex) {
-            modifyIndex(data['new_id']);
+        if (content.containsKey('chat_id')) {
+          if (content.containsKey('new_id')) {
+            updateChatList();
+
+            if (content['chat_id'] == _chatIndex) {
+              modifyIndex(content['new_id']);
+            }
           }
-        }
 
-        if (data.containsKey('status')) {
-          final chat = _chatList.where((e) => e.id == data['chat_id']).first;
-          if (data['status'] == 'generating' && chat.isGenerating == false) {
-            generating(chat.id!);
-          }
+          if (content.containsKey('status')) {
+            final chat = _chatList
+                .where((e) => e.id == content['chat_id'])
+                .first;
+            if (content['status'] == 'generating' &&
+                chat.isGenerating == false) {
+              generating(chat.id!);
+            }
 
-          if (data['status'] == 'completed') {
-            stopGenerating(chat.id!);
+            if (content['status'] == 'completed') {
+              stopGenerating(chat.id!);
+            }
           }
         }
       }

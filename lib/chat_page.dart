@@ -79,56 +79,66 @@ class _ChatPageState extends State<ChatPage> {
   void _addSub() {
     _socSub = _socket.events.listen(
       (raw) {
-        final e = jsonDecode(raw);
+        final e = jsonDecode(raw) as Map;
 
-        if (e.containsKey('id') &&
-            e.containsKey('chat_id') &&
-            e['chat_id'] == chatId) {
-          if (e.containsKey('content') && e.containsKey('attachments')) {
-            Message? message;
+        if (!e.containsKey('type') &&
+            !e.containsKey('content') &&
+            e['type'] != "content") {
+          null;
+        } else {
+          final content = e['content'] as Map;
 
-            for (final m in msgList) {
-              if (m.id == e['id']) {
-                message = m;
-                break;
+          if (content.containsKey('id') &&
+              content.containsKey('chat_id') &&
+              content['chat_id'] == chatId) {
+            if (content.containsKey('content') &&
+                content.containsKey('attachments')) {
+              Message? message;
+
+              for (final m in msgList) {
+                if (m.id == content['id']) {
+                  message = m;
+                  break;
+                }
               }
-            }
 
-            if (message == null) {
-              message = message = Message(
-                id: e['id'],
-                role: e['role'],
-                content: '',
-                attachments: null,
-                metrics: null,
-                timestamp: e['timestamp'],
-              );
+              if (message == null) {
+                message = message = Message(
+                  id: content['id'],
+                  role: content['role'],
+                  content: '',
+                  attachments: null,
+                  metrics: null,
+                  timestamp: content['timestamp'],
+                );
 
-              msgList.add(message);
-            }
-
-            if (message.attachments == null && e['attachments'] != null) {
-              _getFiles(message.id!, e['attachments']);
-            }
-
-            message.content += e['content'];
-            message.metrics = e['metrics'];
-
-            if (!mounted) return;
-
-            setState(() {
-              if (_isNearBottom()) {
-                _scrollToBottom();
+                msgList.add(message);
               }
-            });
-          }
 
-          if (e.containsKey('metrics')) {
-            final message = msgList.last;
+              if (message.attachments == null &&
+                  content['attachments'] != null) {
+                _getFiles(message.id!, content['attachments']);
+              }
 
-            setState(() {
-              message.metrics = e['metrics'];
-            });
+              message.content += content['content'];
+              message.metrics = content['metrics'];
+
+              if (!mounted) return;
+
+              setState(() {
+                if (_isNearBottom()) {
+                  _scrollToBottom();
+                }
+              });
+            }
+
+            if (content.containsKey('metrics')) {
+              final message = msgList.last;
+
+              setState(() {
+                message.metrics = content['metrics'];
+              });
+            }
           }
         }
       },
