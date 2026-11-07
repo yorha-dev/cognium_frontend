@@ -78,68 +78,66 @@ class _ChatPageState extends State<ChatPage> {
 
   void _addSub() {
     _socSub = _socket.events.listen(
-      (raw) {
-        final e = jsonDecode(raw) as Map;
+      (event) {
+        try {
+          final data = jsonDecode(event);
 
-        if (!e.containsKey('type') &&
-            !e.containsKey('content') &&
-            e['type'] != "content") {
-          null;
-        } else {
-          final content = e['content'] as Map;
-
-          if (content.containsKey('id') &&
-              content.containsKey('chat_id') &&
-              content['chat_id'] == chatId) {
-            if (content.containsKey('content') &&
-                content.containsKey('attachments')) {
-              Message? message;
-
-              for (final m in msgList) {
-                if (m.id == content['id']) {
-                  message = m;
-                  break;
-                }
-              }
-
-              if (message == null) {
-                message = message = Message(
-                  id: content['id'],
-                  role: content['role'],
-                  content: '',
-                  attachments: null,
-                  metrics: null,
-                  timestamp: content['timestamp'],
-                );
-
-                msgList.add(message);
-              }
-
-              if (message.attachments == null &&
-                  content['attachments'] != null) {
-                _getFiles(message.id!, content['attachments']);
-              }
-
-              message.content += content['content'];
-              message.metrics = content['metrics'];
-
-              if (!mounted) return;
-
-              setState(() {
-                if (_isNearBottom()) {
-                  _scrollToBottom();
-                }
-              });
-            }
-
-            if (content.containsKey('metrics')) {
-              final message = msgList.last;
-
-              setState(() {
-                message.metrics = content['metrics'];
-              });
-            }
+          if (data is! Map<String, dynamic>) {
+            return;
           }
+
+          final content = data['content'];
+
+          if (content is! Map<String, dynamic>) {
+            return;
+          }
+
+          if (content['chat_id'] != chatId) return;
+
+          final id = content['id'];
+          final role = content['role'];
+          final text = content['content'];
+
+          if (id == null || role == null) return;
+
+          Message? message = msgList
+              .where((m) => m.id == content['id'])
+              .firstOrNull;
+
+          if (message == null) {
+            message = Message(
+              id: id,
+              role: role,
+              content: '',
+              attachments: null,
+              metrics: null,
+              timestamp: content['timestamp'],
+            );
+
+            msgList.add(message);
+          }
+
+          if (message.attachments == null && content['attachments'] != null) {
+            _getFiles(message.id!, content['attachments']);
+          }
+
+          if (text is String && text.isNotEmpty) {
+            message.content += text;
+          }
+
+          if (content.containsKey('metrics')) {
+            message.metrics = content['metrics'];
+          }
+
+          if (!mounted) return;
+
+          setState(() {
+            if (_isNearBottom()) {
+              _scrollToBottom();
+            }
+          });
+        } catch (e) {
+          print('Error: ChatPage -> _addSub() => $e');
         }
       },
       onDone: () => print('STREAM CLOSED'),
