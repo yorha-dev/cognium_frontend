@@ -15,13 +15,6 @@ class ChatController extends ChangeNotifier {
     getSelectedModel();
   }
 
-  @override
-  void dispose() {
-    // _sub.cancel();
-
-    super.dispose();
-  }
-
   List<Chat> get chatList => _chatList;
   int get chatIndex => _chatIndex;
   String get selectedModel => _selectedModel;

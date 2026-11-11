@@ -5,14 +5,16 @@ import 'package:flutter/foundation.dart';
 
 import 'package:cognium_frontend/websocket.dart';
 import 'package:cognium_frontend/chat_controller.dart';
+import 'package:cognium_frontend/error_handler.dart';
 
 class SocketController extends ChangeNotifier {
   final WebSocket _soc = WebSocket();
+  final ErrorHandler errorHandler;
   final ChatController chatController;
   late final StreamSubscription _sub;
   int _chatId = 0;
 
-  SocketController({required this.chatController}) {
+  SocketController({required this.chatController, required this.errorHandler}) {
     _sub = _soc.events.listen(
       (event) {
         try {
@@ -36,14 +38,43 @@ class SocketController extends ChangeNotifier {
               _errorReceiver(content);
               break;
             default:
-              print('Unknow event type: ${data['type']}');
+              errorHandler.register(
+                AppError(
+                  category: ErrorCategory.unknow,
+                  severity: ErrorSeverity.warning,
+                  code: 'UNKNOW_EVENT_TYPE',
+                  detail: 'Unknow event type: ${data['type']}',
+                  userMessage: 'Unknow event type received.',
+                  source: 'SocketController',
+                ),
+              );
           }
         } catch (e) {
-          print("Error: SocketController -> $e");
+          errorHandler.register(
+            AppError(
+              category: ErrorCategory.internal,
+              severity: ErrorSeverity.error,
+              code: 'DATA_PROCESS_ERROR',
+              detail: '$e',
+              userMessage: 'Something went wrong.',
+              source: 'SocketController',
+              stackTrace: StackTrace.current,
+            ),
+          );
         }
       },
       onError: (error) {
-        print('Error: SocketController -> WebSocket error: $error');
+        errorHandler.register(
+          AppError(
+            category: ErrorCategory.network,
+            severity: ErrorSeverity.error,
+            code: 'WEBSOCKET_CONNECTION_ERROR',
+            detail: '$error',
+            userMessage: 'An error ocurred on WebSocket comunication',
+            source: 'SocketController',
+            stackTrace: StackTrace.current,
+          ),
+        );
       },
     );
   }
@@ -88,8 +119,28 @@ class SocketController extends ChangeNotifier {
     }
   }
 
-  // When ErrorHandler was implemented
   void _errorReceiver(Map<String, dynamic> data) {
-    null;
+    errorHandler.register(AppError(
+      category: switch (data['category']) {
+        'network' => ErrorCategory.network,
+        'database' => ErrorCategory.database,
+        'inference' => ErrorCategory.inference,
+        'file' => ErrorCategory.file,
+        'internal' => ErrorCategory.internal,
+        _ => ErrorCategory.unknow
+      },
+      severity: switch (data['severity']) {
+        'info' => ErrorSeverity.info,
+        'warning' => ErrorSeverity.warning,
+        'error' => ErrorSeverity.error,
+        'critical' => ErrorSeverity.critical,
+        _ => ErrorSeverity.info
+      },
+      code: data['code'] ?? 'UNKNOW',
+      detail: data['detail'] ?? '',
+      userMessage: data['description'] ?? '',
+      source: data['source'] ?? '',
+      stackTrace: data['traceback']
+    ));
   }
 }
