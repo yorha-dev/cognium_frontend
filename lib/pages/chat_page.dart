@@ -11,7 +11,7 @@ import 'package:cognium_frontend/widgets/attachment_card.dart';
 import 'package:cognium_frontend/chat_controller.dart';
 import 'package:cognium_frontend/services.dart';
 import 'package:cognium_frontend/objects.dart';
-import 'package:cognium_frontend/websocket.dart';
+import 'package:cognium_frontend/websocket/websocket.dart';
 import 'package:cognium_frontend/media.dart';
 
 class ChatPage extends StatefulWidget {

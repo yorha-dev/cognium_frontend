@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:cognium_frontend/websocket.dart';
+import 'package:cognium_frontend/websocket/websocket.dart';
 import 'package:cognium_frontend/chat_controller.dart';
 import 'package:cognium_frontend/error_handler.dart';
 

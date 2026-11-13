@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:cognium_frontend/proxy_page.dart';
+import 'package:cognium_frontend/pages/proxy_page.dart';
 import 'package:cognium_frontend/chat_controller.dart';
 import 'package:cognium_frontend/media.dart';
-import 'package:cognium_frontend/socket_controller.dart';
+import 'package:cognium_frontend/websocket/socket_controller.dart';
 import 'package:cognium_frontend/error_handler.dart';
 
 void main() {

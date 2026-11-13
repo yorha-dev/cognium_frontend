@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:cognium_frontend/config_page.dart';
+import 'package:cognium_frontend/pages/config_page.dart';
 import 'package:provider/provider.dart';
 import 'package:cognium_frontend/services.dart';
-import 'package:cognium_frontend/chat_page.dart';
+import 'package:cognium_frontend/pages/chat_page.dart';
 import 'package:cognium_frontend/chat_controller.dart';
 
 enum Pages { chatPage, imagePage, configPage }
