@@ -13,6 +13,7 @@ import 'package:cognium_frontend/services.dart';
 import 'package:cognium_frontend/objects.dart';
 import 'package:cognium_frontend/websocket/websocket.dart';
 import 'package:cognium_frontend/media.dart';
+import 'package:cognium_frontend/error/error_handler.dart';
 
 class ChatPage extends StatefulWidget {
   final Chat? chat;
@@ -24,6 +25,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  final ErrorHandler errorHandler = ErrorHandler();
   late WebSocket _socket;
   StreamSubscription? _socSub;
   final ScrollController _scrollController = ScrollController();
@@ -137,11 +139,40 @@ class _ChatPageState extends State<ChatPage> {
             }
           });
         } catch (e) {
-          print('Error: ChatPage -> _addSub() => $e');
+          errorHandler.register(
+            AppError(
+              category: ErrorCategory.internal,
+              severity: ErrorSeverity.error,
+              source: '_addSub',
+              code: 'DATA_PROCESS_ERROR',
+              detail: '$e',
+              userMessage: "Something went wrong on Websocket communication.",
+              stackTrace: StackTrace.current,
+            ),
+          );
         }
       },
-      onDone: () => print('STREAM CLOSED'),
-      onError: (err) => print('STREAM ERROR: $err'),
+      onDone: () => errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.warning,
+          code: 'WEBSOCKET_STREAM_CLOSED',
+          detail: 'Chat WebSocket stream has closed',
+          userMessage: 'Chat WebSocket stream has closed.',
+          source: '_addSub',
+          stackTrace: StackTrace.current,
+        ),
+      ),
+      onError: (err) => errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'WEBSOCKET_STREAM_ERROR',
+          detail: '$err',
+          userMessage: 'Chat WebSocket has ended with an error.',
+          stackTrace: StackTrace.current,
+        ),
+      ),
     );
   }
 
@@ -199,7 +230,15 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
     } catch (err) {
-      print('Error: $err'); // Show it on UI
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'UNKNOW_EVENT_ERROR',
+          detail: '$err',
+          userMessage: "An error has ocurred during chat retrieval.",
+        )
+      );
     }
   }
 
@@ -405,7 +444,7 @@ class _ChatPageState extends State<ChatPage> {
                 TextField(
                   controller: _textController,
                   keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.newline,
+                  textInputAction: TextInputAction.go,
                   enableInteractiveSelection: true,
                   onChanged: (_) {
                     setState(() => ());

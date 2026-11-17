@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 
 import 'package:cognium_frontend/objects.dart';
 import 'package:cognium_frontend/services.dart';
+import 'package:cognium_frontend/error/error_handler.dart';
 
 class ChatController extends ChangeNotifier {
+  final ErrorHandler errorHandler = ErrorHandler();
   final List<Chat> _chatList = [];
   int _chatIndex = 0;
   String _selectedModel = '';
@@ -50,7 +52,17 @@ class ChatController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error: $e');
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving selected model data.",
+          source: 'getSelectedModel',
+        ),
+      );
     }
   }
 
@@ -79,7 +91,17 @@ class ChatController extends ChangeNotifier {
         }
       }
     } catch (e) {
-      print('Error: $e'); // Show it on UI
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving chat list.",
+          source: 'updateChatList',
+        )
+      );
     }
 
     notifyListeners();

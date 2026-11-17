@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:cognium_frontend/config.dart';
 import 'package:cognium_frontend/services.dart';
 import 'package:cognium_frontend/chat_controller.dart';
+import 'package:cognium_frontend/error/error_handler.dart';
 
 class ConfigPage extends StatefulWidget {
   const ConfigPage({super.key});
@@ -14,6 +15,8 @@ class ConfigPage extends StatefulWidget {
 }
 
 class _ConfigPageState extends State<ConfigPage> {
+  final ErrorHandler errorHandler = ErrorHandler();
+
   ConfigParams config = ConfigParams(
     sysPrt:
         'You are an Artificial inteligence assistant built to answer in the question`s language.',
@@ -77,7 +80,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() {});
       }
     } catch (e) {
-      print('ConfigPage -> initConfig: Error: $e');
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving configuration data.",
+          source: 'initConfig',
+        ),
+      );
     }
   }
 
@@ -85,7 +98,16 @@ class _ConfigPageState extends State<ConfigPage> {
     try {
       await fetchData('/config', 'POST', data: config.toJson()) as Map;
     } catch (e) {
-      print('ConfigPage -> saveCfg: Error: $e');
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage: "An error has ocurred while saving configuration data.",
+          source: 'saveCfg',
+        ),
+      );
     }
   }
 
@@ -97,7 +119,16 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => llmModels.addAll(result['models']));
       }
     } catch (e) {
-      print('error: ConfigPage -> getLlmModels => $e');
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage: "An error has ocurred while retrieving LLM models.",
+          source: 'getLlmModels',
+        ),
+      );
     }
   }
 
@@ -109,7 +140,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => embdModels.addAll(result['models']));
       }
     } catch (e) {
-      print("error: ConfigPage -> getEmbdModels => $e");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving Embedding models.",
+          source: 'getEmbdModels',
+        ),
+      );
     }
   }
 
@@ -121,7 +162,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => diffusionModels.addAll(result['models']));
       }
     } catch (e) {
-      print("error: ConfigPage -> getDiffusionModels => $e");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving diffusion models.",
+          source: 'getDiffusionModels',
+        ),
+      );
     }
   }
 
@@ -133,7 +184,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => ttsModels.addAll(result['models']));
       }
     } catch (e) {
-      print("error: ConfigPage -> getTTSMModels => $e");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving TTS models.",
+          source: 'getTTSModels',
+        )
+      );
     }
   }
 
@@ -145,7 +206,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => sttModels.addAll(result['models']));
       }
     } catch (e) {
-      print("error: ConfigPage -> getSTTModels => $e");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving STT models.",
+          source: 'getSTTModels',
+        )
+      );
     }
   }
 
@@ -157,7 +228,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => voices.addAll(result['voices']));
       }
     } catch (e) {
-      print("Error: ConfigPage -> getVoices => $e");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving voice options.",
+          source: 'getVoices',
+        )
+      );
     }
   }
 
@@ -169,7 +250,17 @@ class _ConfigPageState extends State<ConfigPage> {
         setState(() => mcpServers.addAll(result['mcpServers']));
       }
     } catch (e) {
-      print("Error: ConfigPage -> getMCPServers => $e");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage:
+              "An error has ocurred while retrieving MCP configuration data.",
+          source: 'getMCPServers',
+        )
+      );
     }
   }
 

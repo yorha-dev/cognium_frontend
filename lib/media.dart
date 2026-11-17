@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'dart:js_interop';
-import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
+
 import 'package:web/web.dart' as web;
 import 'package:record/record.dart' as rec;
 
+import 'package:cognium_frontend/error/error_handler.dart';
+
 class TTSPlayer extends ChangeNotifier {
+  final ErrorHandler errorHandler = ErrorHandler();
+
   web.HTMLAudioElement? _audio;
   String? _url;
   bool _state = false;
@@ -50,8 +56,16 @@ class TTSPlayer extends ChangeNotifier {
     });
 
     _audio!.onError.listen((_) {
-      print(
-        "error: TTSPlayer => Code: ${_audio!.error?.code}\nDetail: ${_audio!.error?.message}",
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.internal,
+          severity: ErrorSeverity.warning,
+          code: 'AUDIO_PLAYER_ERROR',
+          detail: 'Code: ${_audio!.error?.code}\n${_audio!.error?.message}',
+          userMessage:
+              "An error has ocurred on TTSPlayer; Code: ${_audio!.error?.code}.",
+          source: 'TTSPlayer.play',
+        ),
       );
     });
 
@@ -82,6 +96,8 @@ class TTSPlayer extends ChangeNotifier {
 }
 
 class STTRecorder extends ChangeNotifier {
+  final ErrorHandler errorHandler = ErrorHandler();
+
   rec.AudioRecorder? _recorder;
   StreamSubscription<Uint8List>? _subscription;
   bool _isRecording = false;
@@ -94,7 +110,16 @@ class STTRecorder extends ChangeNotifier {
     _recorder ??= rec.AudioRecorder();
 
     if (!await _recorder!.hasPermission()) {
-      print("error: STTRecorder => Microphone permission denied");
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.internal,
+          severity: ErrorSeverity.warning,
+          code: 'PERMISSION_DENIED',
+          detail: 'Microphone permission denied',
+          userMessage: "Microphone permission denied.",
+          source: 'STTRecorder.record',
+        ),
+      );
       return;
     }
 

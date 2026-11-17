@@ -5,7 +5,8 @@ import 'package:cognium_frontend/pages/proxy_page.dart';
 import 'package:cognium_frontend/chat_controller.dart';
 import 'package:cognium_frontend/media.dart';
 import 'package:cognium_frontend/websocket/socket_controller.dart';
-import 'package:cognium_frontend/error_handler.dart';
+import 'package:cognium_frontend/error/error_handler.dart';
+import 'package:cognium_frontend/keys.dart';
 
 void main() {
   runApp(
@@ -21,16 +22,13 @@ void main() {
           SocketController
         >(
           lazy: false,
-          create: (context) =>
-              SocketController(
-                chatController: context.read<ChatController>(),
-                errorHandler: context.read<ErrorHandler>()
-              ),
+          create: (context) => SocketController(
+            chatController: context.read<ChatController>(),
+            errorHandler: context.read<ErrorHandler>(),
+          ),
           update: (_, chat, error, socket) {
-            return socket ?? SocketController(
-              chatController: chat,
-              errorHandler: error
-            );
+            return socket ??
+                SocketController(chatController: chat, errorHandler: error);
           },
         ),
       ],
@@ -44,6 +42,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ProxyPage());
+    return MaterialApp(navigatorKey: AppKeys.navigationKey, home: ProxyPage());
   }
 }

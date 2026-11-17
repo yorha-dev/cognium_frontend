@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:cognium_frontend/websocket/websocket.dart';
 import 'package:cognium_frontend/chat_controller.dart';
-import 'package:cognium_frontend/error_handler.dart';
+import 'package:cognium_frontend/error/error_handler.dart';
 
 class SocketController extends ChangeNotifier {
   final WebSocket _soc = WebSocket();
@@ -56,7 +56,7 @@ class SocketController extends ChangeNotifier {
               severity: ErrorSeverity.error,
               code: 'DATA_PROCESS_ERROR',
               detail: '$e',
-              userMessage: 'Something went wrong.',
+              userMessage: 'Something went wrong on Websocket communication.',
               source: 'SocketController',
               stackTrace: StackTrace.current,
             ),

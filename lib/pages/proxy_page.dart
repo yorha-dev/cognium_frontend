@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:cognium_frontend/pages/config_page.dart';
 import 'package:provider/provider.dart';
+
+import 'package:cognium_frontend/pages/config_page.dart';
 import 'package:cognium_frontend/services.dart';
 import 'package:cognium_frontend/pages/chat_page.dart';
 import 'package:cognium_frontend/chat_controller.dart';
+import 'package:cognium_frontend/error/error_handler.dart';
 
 enum Pages { chatPage, imagePage, configPage }
 
@@ -16,6 +18,7 @@ class ProxyPage extends StatefulWidget {
 }
 
 class _ProxyPageState extends State<ProxyPage> {
+  final ErrorHandler errorHandler = ErrorHandler();
   final TextEditingController renameController = TextEditingController();
   Pages pageType = Pages.chatPage;
 
@@ -28,7 +31,16 @@ class _ProxyPageState extends State<ProxyPage> {
     try {
       fetchData('/chat/$chatId', 'DELETE');
     } catch (e) {
-      print('deleteChat error -> $e');
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage: "An error has ocurred while deleting chat.",
+          source: 'deleteChat',
+        ),
+      );
     }
   }
 
@@ -36,7 +48,16 @@ class _ProxyPageState extends State<ProxyPage> {
     try {
       fetchData('/chat/$chatId', 'PATCH', data: {'title': title});
     } catch (e) {
-      print('renameChat error -> $e');
+      errorHandler.register(
+        AppError(
+          category: ErrorCategory.network,
+          severity: ErrorSeverity.error,
+          code: 'DATA_FETCH_ERROR',
+          detail: '$e',
+          userMessage: "An error has ocurred while renaming chat.",
+          source: 'renameChat',
+        ),
+      );
     }
   }
 
@@ -69,23 +90,6 @@ class _ProxyPageState extends State<ProxyPage> {
                 setState(() {
                   pageType = Pages.imagePage;
                 });
-
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text("Alert"),
-                      content: const Text("Images button pressed"),
-                      actions: [
-                        TextButton(
-                          style: ButtonStyle(),
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text("OK"),
-                        ),
-                      ],
-                    );
-                  },
-                );
               },
             ),
 
@@ -231,7 +235,7 @@ class _ProxyPageState extends State<ProxyPage> {
           },
         ),
 
-        Pages.imagePage => const Center(child: Text('Image Page')),
+        Pages.imagePage => const Center(child: Text('Future feature')),
 
         Pages.configPage => ConfigPage(),
       },
