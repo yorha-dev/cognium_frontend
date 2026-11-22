@@ -6,6 +6,7 @@ import 'package:cognium_frontend/config.dart';
 import 'package:cognium_frontend/services.dart';
 import 'package:cognium_frontend/chat_controller.dart';
 import 'package:cognium_frontend/error/error_handler.dart';
+import 'package:cognium_frontend/themes/theme_manager.dart';
 
 class ConfigPage extends StatefulWidget {
   const ConfigPage({super.key});
@@ -190,10 +191,9 @@ class _ConfigPageState extends State<ConfigPage> {
           severity: ErrorSeverity.error,
           code: 'DATA_FETCH_ERROR',
           detail: '$e',
-          userMessage:
-              "An error has ocurred while retrieving TTS models.",
+          userMessage: "An error has ocurred while retrieving TTS models.",
           source: 'getTTSModels',
-        )
+        ),
       );
     }
   }
@@ -212,10 +212,9 @@ class _ConfigPageState extends State<ConfigPage> {
           severity: ErrorSeverity.error,
           code: 'DATA_FETCH_ERROR',
           detail: '$e',
-          userMessage:
-              "An error has ocurred while retrieving STT models.",
+          userMessage: "An error has ocurred while retrieving STT models.",
           source: 'getSTTModels',
-        )
+        ),
       );
     }
   }
@@ -234,10 +233,9 @@ class _ConfigPageState extends State<ConfigPage> {
           severity: ErrorSeverity.error,
           code: 'DATA_FETCH_ERROR',
           detail: '$e',
-          userMessage:
-              "An error has ocurred while retrieving voice options.",
+          userMessage: "An error has ocurred while retrieving voice options.",
           source: 'getVoices',
-        )
+        ),
       );
     }
   }
@@ -259,7 +257,7 @@ class _ConfigPageState extends State<ConfigPage> {
           userMessage:
               "An error has ocurred while retrieving MCP configuration data.",
           source: 'getMCPServers',
-        )
+        ),
       );
     }
   }
@@ -267,6 +265,7 @@ class _ConfigPageState extends State<ConfigPage> {
   @override
   Widget build(BuildContext context) {
     final chatCtrl = Provider.of<ChatController>(context, listen: true);
+    final themeManager = Provider.of<ThemeManager>(context, listen: true);
 
     return Stack(
       children: [
@@ -294,7 +293,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                 child: const Text('System'),
                                 onPressed: () {
                                   setState(() {
-                                    null;
+                                    themeManager.setMode(ThemeMode.system);
                                   });
                                 },
                               ),
@@ -303,7 +302,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                 child: const Text('Dark'),
                                 onPressed: () {
                                   setState(() {
-                                    null;
+                                    themeManager.setMode(ThemeMode.dark);
                                   });
                                 },
                               ),
@@ -312,7 +311,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                 child: const Text('Light'),
                                 onPressed: () {
                                   setState(() {
-                                    null;
+                                    themeManager.setMode(ThemeMode.light);
                                   });
                                 },
                               ),
@@ -331,7 +330,11 @@ class _ConfigPageState extends State<ConfigPage> {
                                         controller.open();
                                       }
                                     },
-                                    child: Text('System'),
+                                    child: switch (themeManager.themeMode) {
+                                      ThemeMode.light => Text('Light'),
+                                      ThemeMode.dark => Text('Dark'),
+                                      ThemeMode.system => Text('System'),
+                                    },
                                   );
                                 },
                           ),

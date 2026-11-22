@@ -8,10 +8,21 @@ import 'package:cognium_frontend/websocket/socket_controller.dart';
 import 'package:cognium_frontend/error/error_handler.dart';
 import 'package:cognium_frontend/keys.dart';
 
+import 'package:cognium_frontend/themes/theme_manager.dart';
+import 'package:cognium_frontend/themes/theme_registry.dart';
+import 'package:cognium_frontend/themes/default_theme.dart';
+import 'package:cognium_frontend/themes/app_theme.dart';
+
 void main() {
+  final themeRegistry = ThemeRegistry();
+  themeRegistry.register(DefaultTheme());
+
+  final themeManager = ThemeManager(registry: themeRegistry);
+
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider<ThemeManager>.value(value: themeManager),
         ChangeNotifierProvider(create: (context) => ErrorHandler()),
         ChangeNotifierProvider(create: (context) => ChatController()),
         ChangeNotifierProvider(create: (context) => TTSPlayer()),
@@ -42,6 +53,16 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(navigatorKey: AppKeys.navigationKey, home: ProxyPage());
+    return Consumer<ThemeManager>(
+      builder: (context, manager, child) {
+        return MaterialApp(
+          navigatorKey: AppKeys.navigationKey,
+          home: const ProxyPage(),
+          theme: manager.themes[ThemeVariants.light]!.themeData,
+          darkTheme: manager.themes[ThemeVariants.dark]!.themeData,
+          themeMode: manager.themeMode
+        );
+      },
+    );
   }
 }
